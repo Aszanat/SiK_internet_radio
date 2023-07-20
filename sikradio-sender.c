@@ -33,7 +33,7 @@ int song_sender(int PSIZE, int socket_fd, struct sockaddr_in *client_address_poi
     uint64_t first_byte_num = 0;
     uint64_t first_byte_num_ordered;
     ssize_t bytes_read;
-    ssize_t packet_current_size = 0;
+    ssize_t packet_current_size = 0; // to jest tylko o AUDIO_DATA!
     ssize_t write_size;
     int8_t *packet = malloc(PSIZE + 2 * sizeof(uint64_t));
 
@@ -54,12 +54,12 @@ int song_sender(int PSIZE, int socket_fd, struct sockaddr_in *client_address_poi
             printf("I ate another %d bytes of the song! (session id PRAWDZIWE: %ld, first_byte_num: %ld) \n", PSIZE, session_id_int, first_byte_num);
             memcpy((uint64_t *)packet, &session_id, sizeof(uint64_t));
             memcpy((uint64_t *)(packet + sizeof(uint64_t)), &first_byte_num_ordered, sizeof(uint64_t));
-            write_size = sendto(socket_fd, packet, PSIZE, 0, (struct sockaddr *)client_address_pointer, (socklen_t)sizeof(*client_address_pointer));
-            if (write_size < PSIZE)
+            write_size = sendto(socket_fd, packet, PSIZE + 2 * sizeof(uint64_t), 0, (struct sockaddr *)client_address_pointer, (socklen_t)sizeof(*client_address_pointer));
+            if (write_size < PSIZE + 2 * sizeof(uint64_t))
             {
                 fatal("Halo, cos nie tak?\n");
             }
-            bzero(packet, PSIZE);
+            bzero(packet, PSIZE + 2 * sizeof(uint64_t));
             first_byte_num += PSIZE;
         }
     }
